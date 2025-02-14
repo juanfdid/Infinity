@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -8,7 +8,6 @@
   <meta name="keywords" content="foro, debate, comunidad, ideas, futurista">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://juanfdid.github.io/Infinity/">
-  
   <title>Infinity Forum - El Futuro del Debate</title>
   
   <!-- Normalize CSS -->
@@ -20,18 +19,18 @@
   <!-- Estilos Propios -->
   <link rel="stylesheet" href="styles.css">
   
-  <!-- (Opcional) Código para reCAPTCHA, ver documentación oficial -->
+  <!-- (Opcional) reCAPTCHA: descomenta si decides integrarlo -->
   <!-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> -->
 </head>
 <body>
   <header role="banner">
     <div class="top-bar">
       <div class="logo">
-        <!-- Usamos una imagen; asegurate de tener la imagen en la ruta correcta -->
-        <img src="infinity-background.jpg" alt="Infinity Logo">
+        <!-- Logo con lazy loading para mejorar rendimiento -->
+        <img src="infinity-background.jpg" alt="Infinity Logo" loading="lazy">
         <h1>Infinity Forum</h1>
       </div>
-      <!-- Contenedor para la información del usuario -->
+      <!-- Información del usuario (se completará al iniciar sesión) -->
       <div id="user-info"></div>
       <nav class="nav-options">
         <ul>
@@ -48,7 +47,6 @@
         <button id="neural-mode-toggle" aria-label="Activar Interfaz Neural">Interfaz Neural</button>
       </div>
     </div>
-    <!-- Contenedor de notificaciones -->
     <div id="notif-container">
       <button id="notif-button" aria-label="Notificaciones">Notificaciones</button>
       <div id="notif-dropdown">
@@ -60,8 +58,8 @@
   </header>
   
   <main>
-    <!-- Sección de Autenticación -->
-    <section id="auth-section" aria-label="Autenticación">
+    <!-- Sección de Login (minimalista) -->
+    <section id="auth-section" aria-label="Iniciar Sesión">
       <article id="login-container">
         <h2>Iniciar Sesión</h2>
         <form id="login-form" novalidate>
@@ -69,43 +67,16 @@
           <input type="text" id="login-username" placeholder="Nombre de usuario" required>
           <label for="login-password">Contraseña</label>
           <input type="password" id="login-password" placeholder="Contraseña" required>
-          <!-- (Opcional) reCAPTCHA -->  
+          <!-- (Opcional) reCAPTCHA aquí -->
           <button type="submit">Entrar</button>
         </form>
-      </article>
-      <article id="register-container">
-        <h2>Registrarse</h2>
-        <form id="register-form" novalidate>
-          <label for="register-username">Nombre de usuario</label>
-          <input type="text" id="register-username" placeholder="Nombre de usuario" required>
-          <label for="register-password">Contraseña</label>
-          <input type="password" id="register-password" placeholder="Contraseña" required>
-          <label for="register-password-confirm">Confirmar contraseña</label>
-          <input type="password" id="register-password-confirm" placeholder="Confirmar contraseña" required>
-          <label for="register-avatar">Avatar (opcional)</label>
-          <input type="file" id="register-avatar" accept="image/*">
-          <label for="register-bio">Bio (opcional)</label>
-          <textarea id="register-bio" placeholder="Cuéntanos sobre ti"></textarea>
-          <!-- (Opcional) reCAPTCHA -->  
-          <button type="submit">Registrarse</button>
-        </form>
+        <!-- Botón para abrir el modal de registro -->
+        <button id="open-register">Registrarse</button>
       </article>
     </section>
     
-    <!-- Sección de Perfil (oculta inicialmente) -->
-    <section id="profile-section" aria-label="Perfil de usuario" style="display: none;">
-      <h2>Mi Perfil</h2>
-      <div id="profile-info">
-        <img id="profile-avatar" class="avatar" src="" alt="Avatar de usuario" style="display: none;">
-        <p id="profile-username"></p>
-        <p id="profile-bio"></p>
-      </div>
-      <button id="edit-profile-button">Editar Perfil</button>
-    </section>
-    
-    <!-- Sección del Foro -->
-    <section id="forum-section" aria-label="Foro">
-      <!-- Barra de búsqueda y ordenamiento -->
+    <!-- Sección del Foro (visible tras iniciar sesión) -->
+    <section id="forum-section" aria-label="Foro" style="display: none;">
       <div id="search-bar">
         <label for="search-input" class="visually-hidden">Buscar publicaciones</label>
         <input type="text" id="search-input" placeholder="Buscar publicaciones...">
@@ -117,28 +88,58 @@
         </select>
         <button id="search-button">Buscar</button>
       </div>
-      
-      <!-- Nueva Publicación -->
       <section id="new-post" aria-label="Nueva Publicación">
         <h2>Comparte tu idea</h2>
         <form id="post-form" novalidate>
           <label for="post-input" class="visually-hidden">Contenido de la publicación</label>
           <textarea id="post-input" placeholder="¿Qué piensas?" required></textarea>
-          <label for="post-image">Adjuntar imagen (opcional)</label>
-          <input type="file" id="post-image" accept="image/*">
+          <!-- Botón personalizado para subir foto -->
+          <label for="post-image" class="custom-file-upload">Subir Foto</label>
+          <input type="file" id="post-image" accept="image/*" capture="environment">
           <button type="submit">Publicar</button>
         </form>
       </section>
-      
-      <!-- Lista de Publicaciones -->
       <section id="posts-section" aria-label="Publicaciones">
         <h2>Publicaciones</h2>
         <ul id="posts-list"></ul>
       </section>
     </section>
+    
+    <!-- Sección de Perfil (visible tras iniciar sesión) -->
+    <section id="profile-section" aria-label="Perfil de usuario" style="display: none;">
+      <h2>Mi Perfil</h2>
+      <div id="profile-info">
+        <img id="profile-avatar" class="avatar" src="" alt="Avatar de usuario" style="display: none;" loading="lazy">
+        <p id="profile-username"></p>
+        <p id="profile-bio"></p>
+      </div>
+      <button id="edit-profile-button">Editar Perfil</button>
+    </section>
   </main>
   
-  <!-- Modal para editar perfil -->
+  <!-- Modal para Registro -->
+  <div id="register-modal" role="dialog" aria-modal="true" aria-labelledby="register-modal-title" style="display: none;">
+    <div class="modal-content">
+      <h2 id="register-modal-title">Registrarse</h2>
+      <form id="register-form" novalidate>
+        <label for="register-username">Nombre de usuario</label>
+        <input type="text" id="register-username" placeholder="Nombre de usuario" required>
+        <label for="register-password">Contraseña</label>
+        <input type="password" id="register-password" placeholder="Contraseña" required>
+        <label for="register-password-confirm">Confirmar contraseña</label>
+        <input type="password" id="register-password-confirm" placeholder="Confirmar contraseña" required>
+        <label for="register-avatar">Avatar (opcional)</label>
+        <input type="file" id="register-avatar" accept="image/*">
+        <label for="register-bio">Bio (opcional)</label>
+        <textarea id="register-bio" placeholder="Cuéntanos sobre ti"></textarea>
+        <!-- (Opcional) reCAPTCHA aquí -->
+        <button type="submit">Registrarse</button>
+        <button type="button" id="close-register">Cancelar</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Modal para Editar Perfil -->
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" style="display: none;">
     <div class="modal-content">
       <h2 id="modal-title">Editar Perfil</h2>
@@ -153,7 +154,7 @@
     </div>
   </div>
   
-  <!-- Panel del AI Assistant (oculto inicialmente) -->
+  <!-- Panel del AI Assistant -->
   <div id="assistant-panel" role="complementary" aria-label="AI Assistant" aria-hidden="true" style="display: none;">
     <h2>Asistente de IA</h2>
     <div id="assistant-chat">
@@ -168,4 +169,3 @@
   <script src="scripts.js" defer></script>
 </body>
 </html>
-
