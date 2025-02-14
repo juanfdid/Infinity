@@ -30,8 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     load(key) {
-      try {
-        return JSON.parse(localStorage.getItem(key)) || [];
+      try { 
+        return JSON.parse(localStorage.getItem(key)) || []; 
       } catch (e) {
         console.error(`Error al cargar ${key}:`, e);
         return [];
@@ -90,8 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
     socket: null,
     init() {
       try {
-        // Usamos un echo server confiable
-        this.socket =this.socket = new WebSocket("wss://ws.postman-echo.com/raw");
+        // Usamos un servidor de eco para pruebas; en producción, reemplazá por tu propio endpoint seguro
+        this.socket = new WebSocket("wss://ws.postman-echo.com/raw");
         this.socket.onopen = () => Logger.log("WebSocket conectado", {});
         this.socket.onmessage = (msg) => {
           try {
@@ -101,14 +101,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const data = JSON.parse(msg.data);
             if (data.type === "UPDATE_POSTS") renderPosts(searchInput.value);
-          } catch (error) {
-            Logger.error("Error al procesar mensaje WebSocket: " + error);
-          }
+          } catch (error) { Logger.error("Error al procesar mensaje WebSocket: " + error); }
         };
         this.socket.onerror = (e) => Logger.error("WebSocket error: ", e);
-      } catch (e) {
-        Logger.error("Error inicializando WebSocket: ", e);
-      }
+      } catch (e) { Logger.error("Error inicializando WebSocket: ", e); }
     },
     send(data) {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -157,10 +153,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /***** GESTIÓN DE USUARIOS *****/
   const UserManager = {
     load: () => StorageUtil.load(STORAGE_KEYS.users),
-    save(users) {
-      StorageUtil.save(STORAGE_KEYS.users, users);
-    },
-    register(username, password, confirmPassword, avatar) {
+    save(users) { StorageUtil.save(STORAGE_KEYS.users, users); },
+    register(username, password, confirmPassword, avatar, bio) {
       const users = this.load();
       if (users.some(u => u.username === username)) {
         alert("El nombre de usuario ya existe.");
@@ -170,38 +164,37 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Las contraseñas no coinciden.");
         return false;
       }
-      users.push({ username, password, avatar: avatar || null });
+      users.push({ username, password, avatar: avatar || null, bio: bio || "", following: [], followers: [] });
       this.save(users);
       alert("Registro exitoso. Ahora inicia sesión.");
       return true;
     },
     login(username, password) {
       const user = this.load().find(u => u.username === username && u.password === password);
-      if (!user) {
-        alert("Credenciales incorrectas.");
-        return false;
-      }
+      if (!user) { alert("Credenciales incorrectas."); return false; }
       localStorage.setItem(STORAGE_KEYS.currentUser, username);
       return true;
     },
-    logout() {
-      localStorage.removeItem(STORAGE_KEYS.currentUser);
-    },
-    getCurrent() {
-      return localStorage.getItem(STORAGE_KEYS.currentUser);
-    },
+    logout() { localStorage.removeItem(STORAGE_KEYS.currentUser); },
+    getCurrent() { return localStorage.getItem(STORAGE_KEYS.currentUser); },
     getAvatar(username) {
       const user = this.load().find(u => u.username === username);
       return user && user.avatar ? user.avatar : null;
+    },
+    updateProfile(newData) {
+      let users = this.load();
+      users = users.map(u => u.username === this.getCurrent() ? { ...u, ...newData } : u);
+      this.save(users);
+      if (newData.username) {
+        localStorage.setItem(STORAGE_KEYS.currentUser, newData.username);
+      }
     }
   };
 
   /***** GESTIÓN DE PUBLICACIONES *****/
   const PostManager = {
     load: () => StorageUtil.load(STORAGE_KEYS.posts),
-    save(posts) {
-      StorageUtil.save(STORAGE_KEYS.posts, posts);
-    },
+    save(posts) { StorageUtil.save(STORAGE_KEYS.posts, posts); },
     add(post) {
       let posts = this.load();
       posts.push(post);
@@ -261,19 +254,13 @@ document.addEventListener("DOMContentLoaded", () => {
   /***** GESTIÓN DE NOTIFICACIONES *****/
   const NotificationManager = {
     notifications: StorageUtil.load(STORAGE_KEYS.notifications),
-    save() {
-      StorageUtil.save(STORAGE_KEYS.notifications, this.notifications);
-    },
+    save() { StorageUtil.save(STORAGE_KEYS.notifications, this.notifications); },
     add(msg) {
       this.notifications.push({ id: generateId(), message: msg });
       this.save();
       updateNotifUI();
     },
-    clear() {
-      this.notifications = [];
-      this.save();
-      updateNotifUI();
-    },
+    clear() { this.notifications = []; this.save(); updateNotifUI(); },
     remove(id) {
       this.notifications = this.notifications.filter(n => n.id !== id);
       this.save();
@@ -322,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
     li.className = "post";
     li.dataset.id = post.id;
 
-    // Encabezado
+    // Encabezado de la publicación
     const header = document.createElement("div");
     header.className = "post-header";
     const avatarImg = document.createElement("img");
@@ -335,13 +322,14 @@ document.addEventListener("DOMContentLoaded", () => {
     header.appendChild(headerText);
     li.appendChild(header);
 
-    // Contenido
+    // Contenido de la publicación
     const contentP = document.createElement("p");
     contentP.className = "post-content";
+    // Sanitizamos el contenido (puedes integrar DOMPurify si lo deseas)
     contentP.textContent = post.content;
     li.appendChild(contentP);
 
-    // Imagen (si existe)
+    // Imagen adjunta, si existe
     if (post.image) {
       const img = document.createElement("img");
       img.src = post.image;
@@ -352,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
       li.appendChild(img);
     }
 
-    // Formulario de edición (solo autor)
+    // Formulario de edición (solo para el autor)
     const editForm = document.createElement("form");
     editForm.className = "edit-form";
     const editTextarea = document.createElement("textarea");
@@ -368,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editForm.appendChild(cancelBtn);
     li.appendChild(editForm);
 
-    // Acciones
+    // Acciones de la publicación
     const actionsDiv = document.createElement("div");
     actionsDiv.className = "post-actions";
     const likeBtn = document.createElement("button");
@@ -413,19 +401,24 @@ document.addEventListener("DOMContentLoaded", () => {
           contentP.style.display = "block";
         }
       });
-      deleteBtn.addEventListener("click", () => {
-        if (confirm("¿Borrar publicación?")) PostManager.delete(post.id);
-      });
+      deleteBtn.addEventListener("click", () => { if (confirm("¿Borrar publicación?")) PostManager.delete(post.id); });
     }
     li.appendChild(actionsDiv);
 
     likeBtn.addEventListener("click", () => {
-      PostManager.update(post.id, { likes: post.likes + 1 });
-      likeBtn.textContent = `❤️ ${post.likes + 1}`;
-      NotificationManager.add(`${currentUser} le dio like a la publicación de ${post.user}`);
+      // Control de likes únicos:
+      if (!post.likedBy) post.likedBy = [];
+      if (!post.likedBy.includes(currentUser)) {
+        post.likedBy.push(currentUser);
+        PostManager.update(post.id, { likes: post.likes + 1, likedBy: post.likedBy });
+        likeBtn.textContent = `❤️ ${post.likes + 1}`;
+        NotificationManager.add(`${currentUser} le dio like a la publicación de ${post.user}`);
+      } else {
+        alert("Ya le diste like a esta publicación.");
+      }
     });
 
-    // Respuestas
+    // Sección de respuestas
     const repliesContainer = document.createElement("div");
     repliesContainer.className = "replies-container";
     const repliesList = document.createElement("ul");
@@ -584,11 +577,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /***** AUTOGUARDADO DEL BORRADOR *****/
   const draftKey = STORAGE_KEYS.postDraft;
-  const postInput = document.getElementById("post-input");
   if (localStorage.getItem(draftKey)) postInput.value = localStorage.getItem(draftKey);
   postInput.addEventListener("input", () => localStorage.setItem(draftKey, postInput.value));
 
-  const postForm = document.getElementById("post-form");
   postForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const content = postInput.value.trim();
@@ -599,9 +590,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const reader = new FileReader();
       reader.onload = (ev) => { createAndSavePost(content, ev.target.result, currentUser); };
       reader.readAsDataURL(fileInput.files[0]);
-    } else {
-      createAndSavePost(content, null, currentUser);
-    }
+    } else { createAndSavePost(content, null, currentUser); }
   });
 
   const createAndSavePost = (content, image, currentUser) => {
@@ -611,6 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
       content,
       image,
       likes: 0,
+      likedBy: [],
       timestamp: Date.now(),
       replies: []
     };
@@ -649,13 +639,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const username = document.getElementById("register-username").value.trim();
       const password = document.getElementById("register-password").value.trim();
       const confirm = document.getElementById("register-password-confirm").value.trim();
+      const bio = document.getElementById("register-bio") ? document.getElementById("register-bio").value.trim() : "";
       const fileInput = document.getElementById("register-avatar");
       if (fileInput && fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = (ev) => { if (UserManager.register(username, password, confirm, ev.target.result)) registerForm.reset(); };
+        reader.onload = (ev) => { if (UserManager.register(username, password, confirm, ev.target.result, bio)) registerForm.reset(); };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        if (UserManager.register(username, password, confirm, null)) registerForm.reset();
+        if (UserManager.register(username, password, confirm, null, bio)) registerForm.reset();
       }
     });
   }
@@ -697,13 +688,9 @@ document.addEventListener("DOMContentLoaded", () => {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
   }
-  const neuralToggle = document.getElementById("neural-mode-toggle");
   if (neuralToggle) {
     neuralToggle.addEventListener("click", () => {
-      if (!recognition) {
-        alert("El reconocimiento de voz no está soportado en este navegador.");
-        return;
-      }
+      if (!recognition) { alert("El reconocimiento de voz no está soportado en este navegador."); return; }
       neuralToggle.textContent = "Escuchando...";
       recognition.start();
     });
@@ -713,13 +700,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const transcript = event.results[0][0].transcript;
       postInput.value += (postInput.value ? " " : "") + transcript;
     });
-    recognition.addEventListener("end", () => {
-      if (neuralToggle) neuralToggle.textContent = "Interfaz Neural";
-    });
+    recognition.addEventListener("end", () => { if (neuralToggle) neuralToggle.textContent = "Interfaz Neural"; });
   }
 
   /***** AI ASSISTANT *****/
   async function getAIResponse(query) {
+    // Ejemplo de integración con una API externa:
+    // Reemplazá la URL y agrega tu clave API según la documentación de la API (por ejemplo, OpenAI)
+    // return fetch("https://api.tu-ai.com/v1/respond", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "Authorization": "Bearer TU_CLAVE_API"
+    //   },
+    //   body: JSON.stringify({ prompt: query })
+    // }).then(res => res.json()).then(data => data.response);
+    
+    // Simulación simple:
     const baseResponses = [
       "Gracias por compartir tus pensamientos. ¿Podrías contarme más sobre eso?",
       "Interesante, me encantaría conocer más detalles de tu perspectiva.",
@@ -739,10 +736,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (assistantPanel.style.display === "none" || assistantPanel.getAttribute("aria-hidden") === "true") {
           assistantPanel.style.display = "block";
           assistantPanel.setAttribute("aria-hidden", "false");
+          assistantToggle.textContent = "Ocultar AI Assistant";
           window.scrollTo({ top: assistantPanel.offsetTop, behavior: "smooth" });
         } else {
           assistantPanel.setAttribute("aria-hidden", "true");
           setTimeout(() => { assistantPanel.style.display = "none"; }, 300);
+          assistantToggle.textContent = "AI Assistant";
         }
       }
     });
@@ -792,10 +791,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const fileInput = document.getElementById("edit-profile-avatar");
       if (!newUsername) return;
       let users = UserManager.load();
-      if (users.some(u => u.username === newUsername)) {
-        alert("El nombre ya existe.");
-        return;
-      }
+      if (users.some(u => u.username === newUsername)) { alert("El nombre ya existe."); return; }
       users = users.map(u => u.username === UserManager.getCurrent() ? { ...u, username: newUsername } : u);
       UserManager.save(users);
       let posts = PostManager.load();
@@ -856,6 +852,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           const profileUsername = document.getElementById("profile-username");
           if (profileUsername) profileUsername.textContent = `Usuario: ${UserManager.getCurrent()}`;
+          // Mostrar bio si existe:
+          const currentUser = UserManager.getCurrent();
+          const users = UserManager.load();
+          const currentData = users.find(u => u.username === currentUser);
+          const profileBio = document.getElementById("profile-bio");
+          if (profileBio) profileBio.textContent = currentData && currentData.bio ? currentData.bio : "";
         });
       }
     }
@@ -874,7 +876,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /***** EVENTOS GLOBALES: Cambio de idioma (Ctrl+L) *****/
   document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.key === "l") {
+    if (e.ctrlKey && e.key === "l") { 
       switchLanguage(currentLang === "es" ? "en" : "es");
     }
   });
@@ -912,6 +914,23 @@ document.addEventListener("DOMContentLoaded", () => {
     navNotifs.addEventListener("click", (e) => {
       e.preventDefault();
       if (notifDropdown) notifDropdown.style.display = notifDropdown.style.display === "block" ? "none" : "block";
+    });
+  }
+  if (navAI) {
+    navAI.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (assistantPanel) {
+        if (assistantPanel.style.display === "none" || assistantPanel.getAttribute("aria-hidden") === "true") {
+          assistantPanel.style.display = "block";
+          assistantPanel.setAttribute("aria-hidden", "false");
+          assistantToggle.textContent = "Ocultar AI Assistant";
+          window.scrollTo({ top: assistantPanel.offsetTop, behavior: "smooth" });
+        } else {
+          assistantPanel.setAttribute("aria-hidden", "true");
+          setTimeout(() => { assistantPanel.style.display = "none"; }, 300);
+          assistantToggle.textContent = "AI Assistant";
+        }
+      }
     });
   }
 
