@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /***** CACHE DE ELEMENTOS DEL DOM (Para minimizar accesos repetidos) *****/
+  /***** CACHE DE ELEMENTOS DEL DOM *****/
   const authSection = document.getElementById("auth-section");
   const forumSection = document.getElementById("forum-section");
   const profileSection = document.getElementById("profile-section");
@@ -274,6 +274,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearNotifsBtn = document.getElementById("clear-notifs");
   const modal = document.getElementById("modal");
   const registerModal = document.getElementById("register-modal");
+  // Agregamos postInput para utilizarlo en el autoguardado y publicación
+  const postInput = document.getElementById("post-input");
 
   // Elementos de navegación
   const navHome = document.getElementById("nav-home");
@@ -324,7 +326,6 @@ document.addEventListener("DOMContentLoaded", () => {
       img.style.maxWidth = "100%";
       img.style.borderRadius = "4px";
       img.style.marginBottom = "0.75rem";
-      // Lazy loading para mejorar rendimiento
       img.loading = "lazy";
       li.appendChild(img);
     }
@@ -707,7 +708,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /***** AI ASSISTANT *****/
   async function getAIResponse(query) {
-    // Para integrar una API real, reemplazá el código a continuación según la documentación de la API.
+    // Aquí podrías integrar una API real, por ejemplo, usando fetch y tu clave API.
     const baseResponses = [
       "Gracias por compartir tus pensamientos. ¿Podrías contarme más sobre eso?",
       "Interesante, me encantaría conocer más detalles de tu perspectiva.",
@@ -727,12 +728,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (assistantPanel.style.display === "none" || assistantPanel.getAttribute("aria-hidden") === "true") {
           assistantPanel.style.display = "block";
           assistantPanel.setAttribute("aria-hidden", "false");
-          assistantToggle.textContent = "Ocultar AI Assistant";
+          navAI.textContent = "Ocultar AI Assistant";
           window.scrollTo({ top: assistantPanel.offsetTop, behavior: "smooth" });
         } else {
           assistantPanel.setAttribute("aria-hidden", "true");
           setTimeout(() => { assistantPanel.style.display = "none"; }, 300);
-          assistantToggle.textContent = "AI Assistant";
+          navAI.textContent = "AI Assistant";
         }
       }
     });
@@ -913,12 +914,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (assistantPanel.style.display === "none" || assistantPanel.getAttribute("aria-hidden") === "true") {
           assistantPanel.style.display = "block";
           assistantPanel.setAttribute("aria-hidden", "false");
-          assistantToggle.textContent = "Ocultar AI Assistant";
+          navAI.textContent = "Ocultar AI Assistant";
           window.scrollTo({ top: assistantPanel.offsetTop, behavior: "smooth" });
         } else {
           assistantPanel.setAttribute("aria-hidden", "true");
           setTimeout(() => { assistantPanel.style.display = "none"; }, 300);
-          assistantToggle.textContent = "AI Assistant";
+          navAI.textContent = "AI Assistant";
         }
       }
     });
