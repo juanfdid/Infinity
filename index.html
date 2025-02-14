@@ -1,28 +1,37 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Meta Tags SEO -->
+  <meta name="description" content="Infinity Forum: el foro futurista para debates, ideas y colaboración inmersiva.">
+  <meta name="keywords" content="foro, debate, comunidad, ideas, futurista">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://juanfdid.github.io/Infinity/">
+  
   <title>Infinity Forum - El Futuro del Debate</title>
-  <meta name="description" content="Infinity Forum: un espacio futurista para debates, ideas y colaboración inmersiva.">
+  
   <!-- Normalize CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <!-- Estilos propios -->
+  <!-- Estilos Propios -->
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- (Opcional) Código para reCAPTCHA, ver documentación oficial -->
+  <!-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> -->
 </head>
 <body>
   <header role="banner">
     <div class="top-bar">
       <div class="logo">
-        <!-- Se utiliza un placeholder de 50x50 -->
-        <img src="https://via.placeholder.com/50" alt="Infinity Logo">
+        <!-- Usamos una imagen; asegurate de tener la imagen en la ruta correcta -->
+        <img src="infinity-background.jpg" alt="Infinity Logo">
         <h1>Infinity Forum</h1>
       </div>
-      <!-- Contenedor para información del usuario -->
+      <!-- Contenedor para la información del usuario -->
       <div id="user-info"></div>
       <nav class="nav-options">
         <ul>
@@ -60,6 +69,7 @@
           <input type="text" id="login-username" placeholder="Nombre de usuario" required>
           <label for="login-password">Contraseña</label>
           <input type="password" id="login-password" placeholder="Contraseña" required>
+          <!-- (Opcional) reCAPTCHA -->  
           <button type="submit">Entrar</button>
         </form>
       </article>
@@ -74,6 +84,9 @@
           <input type="password" id="register-password-confirm" placeholder="Confirmar contraseña" required>
           <label for="register-avatar">Avatar (opcional)</label>
           <input type="file" id="register-avatar" accept="image/*">
+          <label for="register-bio">Bio (opcional)</label>
+          <textarea id="register-bio" placeholder="Cuéntanos sobre ti"></textarea>
+          <!-- (Opcional) reCAPTCHA -->  
           <button type="submit">Registrarse</button>
         </form>
       </article>
@@ -85,6 +98,7 @@
       <div id="profile-info">
         <img id="profile-avatar" class="avatar" src="" alt="Avatar de usuario" style="display: none;">
         <p id="profile-username"></p>
+        <p id="profile-bio"></p>
       </div>
       <button id="edit-profile-button">Editar Perfil</button>
     </section>
@@ -154,3 +168,4 @@
   <script src="scripts.js" defer></script>
 </body>
 </html>
+
