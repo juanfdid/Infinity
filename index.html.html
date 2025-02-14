@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinity Forum - El Futuro del Debate</title>
+  <meta name="description" content="Infinity Forum: un espacio futurista para debates, ideas y colaboración inmersiva.">
+  <!-- Normalize CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Estilos propios -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header role="banner">
+    <div class="top-bar">
+      <div class="logo">
+        <!-- Se utiliza un placeholder de 50x50 -->
+        <img src="https://via.placeholder.com/50" alt="Infinity Logo">
+        <h1>Infinity Forum</h1>
+      </div>
+      <!-- Contenedor para información del usuario -->
+      <div id="user-info"></div>
+      <nav class="nav-options">
+        <ul>
+          <li><a href="#" id="nav-home">Inicio</a></li>
+          <li><a href="#" id="nav-forum">Foro</a></li>
+          <li><a href="#" id="nav-profile">Perfil</a></li>
+          <li><a href="#" id="nav-notifs">Notificaciones</a></li>
+          <li><a href="#" id="nav-ai">AI Assistant</a></li>
+        </ul>
+      </nav>
+      <div id="controls-container">
+        <button id="dark-mode-toggle" aria-label="Alternar modo oscuro">Modo Oscuro</button>
+        <button id="vr-mode-toggle" aria-label="Activar modo VR">VR Mode</button>
+        <button id="neural-mode-toggle" aria-label="Activar Interfaz Neural">Interfaz Neural</button>
+      </div>
+    </div>
+    <!-- Contenedor de notificaciones -->
+    <div id="notif-container">
+      <button id="notif-button" aria-label="Notificaciones">Notificaciones</button>
+      <div id="notif-dropdown">
+        <h3>Notificaciones</h3>
+        <ul id="notif-list"></ul>
+        <button id="clear-notifs">Limpiar</button>
+      </div>
+    </div>
+  </header>
+  
+  <main>
+    <!-- Sección de Autenticación -->
+    <section id="auth-section" aria-label="Autenticación">
+      <article id="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="login-form" novalidate>
+          <label for="login-username">Nombre de usuario</label>
+          <input type="text" id="login-username" placeholder="Nombre de usuario" required>
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" placeholder="Contraseña" required>
+          <button type="submit">Entrar</button>
+        </form>
+      </article>
+      <article id="register-container">
+        <h2>Registrarse</h2>
+        <form id="register-form" novalidate>
+          <label for="register-username">Nombre de usuario</label>
+          <input type="text" id="register-username" placeholder="Nombre de usuario" required>
+          <label for="register-password">Contraseña</label>
+          <input type="password" id="register-password" placeholder="Contraseña" required>
+          <label for="register-password-confirm">Confirmar contraseña</label>
+          <input type="password" id="register-password-confirm" placeholder="Confirmar contraseña" required>
+          <label for="register-avatar">Avatar (opcional)</label>
+          <input type="file" id="register-avatar" accept="image/*">
+          <button type="submit">Registrarse</button>
+        </form>
+      </article>
+    </section>
+    
+    <!-- Sección de Perfil (oculta inicialmente) -->
+    <section id="profile-section" aria-label="Perfil de usuario" style="display: none;">
+      <h2>Mi Perfil</h2>
+      <div id="profile-info">
+        <img id="profile-avatar" class="avatar" src="" alt="Avatar de usuario" style="display: none;">
+        <p id="profile-username"></p>
+      </div>
+      <button id="edit-profile-button">Editar Perfil</button>
+    </section>
+    
+    <!-- Sección del Foro -->
+    <section id="forum-section" aria-label="Foro">
+      <!-- Barra de búsqueda y ordenamiento -->
+      <div id="search-bar">
+        <label for="search-input" class="visually-hidden">Buscar publicaciones</label>
+        <input type="text" id="search-input" placeholder="Buscar publicaciones...">
+        <label for="sort-select" class="visually-hidden">Ordenar publicaciones</label>
+        <select id="sort-select">
+          <option value="newest">Más recientes</option>
+          <option value="oldest">Más antiguas</option>
+          <option value="popular">Más populares</option>
+        </select>
+        <button id="search-button">Buscar</button>
+      </div>
+      
+      <!-- Nueva Publicación -->
+      <section id="new-post" aria-label="Nueva Publicación">
+        <h2>Comparte tu idea</h2>
+        <form id="post-form" novalidate>
+          <label for="post-input" class="visually-hidden">Contenido de la publicación</label>
+          <textarea id="post-input" placeholder="¿Qué piensas?" required></textarea>
+          <label for="post-image">Adjuntar imagen (opcional)</label>
+          <input type="file" id="post-image" accept="image/*">
+          <button type="submit">Publicar</button>
+        </form>
+      </section>
+      
+      <!-- Lista de Publicaciones -->
+      <section id="posts-section" aria-label="Publicaciones">
+        <h2>Publicaciones</h2>
+        <ul id="posts-list"></ul>
+      </section>
+    </section>
+  </main>
+  
+  <!-- Modal para editar perfil -->
+  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" style="display: none;">
+    <div class="modal-content">
+      <h2 id="modal-title">Editar Perfil</h2>
+      <form id="edit-profile-form" novalidate>
+        <label for="edit-profile-username">Nuevo nombre de usuario</label>
+        <input type="text" id="edit-profile-username" placeholder="Nuevo nombre de usuario" required>
+        <label for="edit-profile-avatar">Nuevo avatar (opcional)</label>
+        <input type="file" id="edit-profile-avatar" accept="image/*">
+        <button type="submit">Guardar</button>
+        <button type="button" id="close-modal">Cancelar</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Panel del AI Assistant (oculto inicialmente) -->
+  <div id="assistant-panel" role="complementary" aria-label="AI Assistant" aria-hidden="true" style="display: none;">
+    <h2>Asistente de IA</h2>
+    <div id="assistant-chat">
+      <div id="assistant-messages"></div>
+      <form id="assistant-form">
+        <input type="text" id="assistant-input" placeholder="Habla conmigo..." required>
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+  </div>
+  
+  <script src="scripts.js" defer></script>
+</body>
+</html>
