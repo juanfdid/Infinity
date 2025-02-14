@@ -23,19 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const StorageUtil = {
     save(key, data) {
-      try {
-        localStorage.setItem(key, JSON.stringify(data));
-      } catch (e) {
-        console.error(`Error guardando ${key}:`, e);
-      }
+      try { localStorage.setItem(key, JSON.stringify(data)); }
+      catch (e) { console.error(`Error guardando ${key}:`, e); }
     },
     load(key) {
-      try { 
-        return JSON.parse(localStorage.getItem(key)) || []; 
-      } catch (e) {
-        console.error(`Error al cargar ${key}:`, e);
-        return [];
-      }
+      try { return JSON.parse(localStorage.getItem(key)) || []; }
+      catch (e) { console.error(`Error al cargar ${key}:`, e); return []; }
     }
   };
 
@@ -77,12 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /***** LOGGER *****/
   const Logger = {
-    log(event, details) {
-      console.log(`[LOG - ${new Date().toLocaleTimeString()}]`, event, details);
-    },
-    error(err) {
-      console.error(`[ERROR - ${new Date().toLocaleTimeString()}]`, err);
-    }
+    log(event, details) { console.log(`[LOG - ${new Date().toLocaleTimeString()}]`, event, details); },
+    error(err) { console.error(`[ERROR - ${new Date().toLocaleTimeString()}]`, err); }
   };
 
   /***** REALTIME SYNC (WebSocket & BroadcastChannel) *****/
@@ -90,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
     socket: null,
     init() {
       try {
-        // Usamos un servidor de eco para pruebas; en producción, reemplazá por tu propio endpoint seguro
         this.socket = new WebSocket("wss://ws.postman-echo.com/raw");
         this.socket.onopen = () => Logger.log("WebSocket conectado", {});
         this.socket.onmessage = (msg) => {
@@ -185,9 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let users = this.load();
       users = users.map(u => u.username === this.getCurrent() ? { ...u, ...newData } : u);
       this.save(users);
-      if (newData.username) {
-        localStorage.setItem(STORAGE_KEYS.currentUser, newData.username);
-      }
+      if (newData.username) localStorage.setItem(STORAGE_KEYS.currentUser, newData.username);
     }
   };
 
@@ -268,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /***** CACHE DE ELEMENTOS DEL DOM *****/
+  /***** CACHE DE ELEMENTOS DEL DOM (Para minimizar accesos repetidos) *****/
   const authSection = document.getElementById("auth-section");
   const forumSection = document.getElementById("forum-section");
   const profileSection = document.getElementById("profile-section");
@@ -278,6 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sortSelect = document.getElementById("sort-select");
   const darkToggle = document.getElementById("dark-mode-toggle");
   const vrToggle = document.getElementById("vr-mode-toggle");
+  const neuralToggle = document.getElementById("neural-mode-toggle");
   const assistantPanel = document.getElementById("assistant-panel");
   const assistantMessages = document.getElementById("assistant-messages");
   const assistantForm = document.getElementById("assistant-form");
@@ -286,6 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const notifList = document.getElementById("notif-list");
   const clearNotifsBtn = document.getElementById("clear-notifs");
   const modal = document.getElementById("modal");
+  const registerModal = document.getElementById("register-modal");
 
   // Elementos de navegación
   const navHome = document.getElementById("nav-home");
@@ -309,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
     li.className = "post";
     li.dataset.id = post.id;
 
-    // Encabezado de la publicación
+    // Encabezado
     const header = document.createElement("div");
     header.className = "post-header";
     const avatarImg = document.createElement("img");
@@ -322,14 +310,13 @@ document.addEventListener("DOMContentLoaded", () => {
     header.appendChild(headerText);
     li.appendChild(header);
 
-    // Contenido de la publicación
+    // Contenido
     const contentP = document.createElement("p");
     contentP.className = "post-content";
-    // Sanitizamos el contenido (puedes integrar DOMPurify si lo deseas)
     contentP.textContent = post.content;
     li.appendChild(contentP);
 
-    // Imagen adjunta, si existe
+    // Imagen adjunta (si existe)
     if (post.image) {
       const img = document.createElement("img");
       img.src = post.image;
@@ -337,10 +324,12 @@ document.addEventListener("DOMContentLoaded", () => {
       img.style.maxWidth = "100%";
       img.style.borderRadius = "4px";
       img.style.marginBottom = "0.75rem";
+      // Lazy loading para mejorar rendimiento
+      img.loading = "lazy";
       li.appendChild(img);
     }
 
-    // Formulario de edición (solo para el autor)
+    // Formulario de edición (solo para autor)
     const editForm = document.createElement("form");
     editForm.className = "edit-form";
     const editTextarea = document.createElement("textarea");
@@ -356,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editForm.appendChild(cancelBtn);
     li.appendChild(editForm);
 
-    // Acciones de la publicación
+    // Acciones
     const actionsDiv = document.createElement("div");
     actionsDiv.className = "post-actions";
     const likeBtn = document.createElement("button");
@@ -406,7 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
     li.appendChild(actionsDiv);
 
     likeBtn.addEventListener("click", () => {
-      // Control de likes únicos:
       if (!post.likedBy) post.likedBy = [];
       if (!post.likedBy.includes(currentUser)) {
         post.likedBy.push(currentUser);
@@ -621,9 +609,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /***** AUTENTICACIÓN *****/
-  const loginForm = document.getElementById("login-form");
-  const registerForm = document.getElementById("register-form");
-
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -633,8 +618,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (registerForm) {
-    registerForm.addEventListener("submit", (e) => {
+  /***** REGISTRO (Modal) *****/
+  const openRegisterBtn = document.getElementById("open-register");
+  if (openRegisterBtn && registerModal) {
+    openRegisterBtn.addEventListener("click", () => { registerModal.style.display = "flex"; });
+  }
+  const closeRegisterBtn = document.getElementById("close-register");
+  if (closeRegisterBtn && registerModal) {
+    closeRegisterBtn.addEventListener("click", () => { registerModal.style.display = "none"; });
+  }
+  if (document.getElementById("register-form")) {
+    document.getElementById("register-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const username = document.getElementById("register-username").value.trim();
       const password = document.getElementById("register-password").value.trim();
@@ -643,10 +637,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const fileInput = document.getElementById("register-avatar");
       if (fileInput && fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = (ev) => { if (UserManager.register(username, password, confirm, ev.target.result, bio)) registerForm.reset(); };
+        reader.onload = (ev) => { 
+          if (UserManager.register(username, password, confirm, ev.target.result, bio)) {
+            document.getElementById("register-form").reset();
+            registerModal.style.display = "none";
+          }
+        };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        if (UserManager.register(username, password, confirm, null, bio)) registerForm.reset();
+        if (UserManager.register(username, password, confirm, null, bio)) {
+          document.getElementById("register-form").reset();
+          registerModal.style.display = "none";
+        }
       }
     });
   }
@@ -705,18 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /***** AI ASSISTANT *****/
   async function getAIResponse(query) {
-    // Ejemplo de integración con una API externa:
-    // Reemplazá la URL y agrega tu clave API según la documentación de la API (por ejemplo, OpenAI)
-    // return fetch("https://api.tu-ai.com/v1/respond", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "Authorization": "Bearer TU_CLAVE_API"
-    //   },
-    //   body: JSON.stringify({ prompt: query })
-    // }).then(res => res.json()).then(data => data.response);
-    
-    // Simulación simple:
+    // Para integrar una API real, reemplazá el código a continuación según la documentación de la API.
     const baseResponses = [
       "Gracias por compartir tus pensamientos. ¿Podrías contarme más sobre eso?",
       "Interesante, me encantaría conocer más detalles de tu perspectiva.",
@@ -852,7 +843,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           const profileUsername = document.getElementById("profile-username");
           if (profileUsername) profileUsername.textContent = `Usuario: ${UserManager.getCurrent()}`;
-          // Mostrar bio si existe:
           const currentUser = UserManager.getCurrent();
           const users = UserManager.load();
           const currentData = users.find(u => u.username === currentUser);
